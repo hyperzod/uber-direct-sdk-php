@@ -1,0 +1,42 @@
+{
+  "name": "hyperzod/uber-direct-sdk-php",
+  "description": "A PHP SDK to integrate Uber Direct with your application.",
+  "keywords": [
+    "hyperzod",
+    "uber-direct-sdk-php"
+  ],
+  "homepage": "https://github.com/hyperzod/uber-direct-sdk-php",
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Mohd Farhan Rizwan",
+      "email": "farhanrizwan123@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.4|^8.0",
+    "guzzlehttp/guzzle": "^7.5"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Hyperzod\\UberDirectSdkPhp\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Hyperzod\\UberDirectSdkPhp\\Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
