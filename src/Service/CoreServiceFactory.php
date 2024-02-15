@@ -12,7 +12,6 @@ class CoreServiceFactory extends AbstractServiceFactory
      * @var array<string, string>
      */
     private static $classMap = [
-        'quote' => QuoteService::class,
         'delivery' => DeliveryService::class,
     ];
 
