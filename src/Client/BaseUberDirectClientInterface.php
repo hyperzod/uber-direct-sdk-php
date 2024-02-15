@@ -8,6 +8,13 @@ namespace Hyperzod\UberDirectSdkPhp\Client;
 interface BaseUberDirectClientInterface
 {
    /**
+    * Gets the Merchant ID used by the client to send requests.
+    *
+    * @return null|string the Merchant ID used by the client to send requests
+    */
+   public function getCustomerID();
+
+   /**
     * Gets the Client ID used by the client to send requests.
     *
     * @return null|string the Client ID used by the client to send requests
@@ -22,11 +29,11 @@ interface BaseUberDirectClientInterface
    public function getClientSecret();
 
    /**
-    * Gets the Merchant ID used by the client to send requests.
+    * Gets the AUTH URL for UberDirect's API.
     *
-    * @return null|string the Merchant ID used by the client to send requests
+    * @return string the AUTH URL for UberDirect's API
     */
-   public function getMerchantID();
+   public function getAuthUrl();
 
    /**
     * Gets the base URL for UberDirect's API.

@@ -4,7 +4,7 @@ namespace Hyperzod\UberDirectSdkPhp\Service;
 
 use Hyperzod\UberDirectSdkPhp\Enums\HttpMethodEnum;
 
-class OrderService extends AbstractService
+class DeliveryService extends AbstractService
 {
    /**
     * Create a job on UberDirect

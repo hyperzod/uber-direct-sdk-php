@@ -20,16 +20,28 @@ class BaseUberDirectClient implements UberDirectClientInterface
     * @param string $api_base the base URL for UberDirect's API
     */
 
-   public function __construct($client_id, $client_secret, $merchant_id, $api_base)
+   public function __construct($customer_id, $client_id, $client_secret, $auth_url, $api_base)
    {
       $config = $this->validateConfig(array(
+         "customer_id" => $customer_id,
          "client_id" => $client_id,
          "client_secret" => $client_secret,
-         "merchant_id" => $merchant_id,
+         "auth_url" => $auth_url,
          "api_base" => $api_base
       ));
 
       $this->config = $config;
+   }
+
+
+   /**
+    * Gets the Customer ID used by the client to send requests.
+    *
+    * @return null|string the Customer ID used by the client to send requests
+    */
+   public function getCustomerID()
+   {
+      return $this->config['customer_id'];
    }
 
    /**
@@ -53,13 +65,13 @@ class BaseUberDirectClient implements UberDirectClientInterface
    }
 
    /**
-    * Gets the Merchant ID used by the client to send requests.
+    * Gets the base URL for UberDirect's API.
     *
-    * @return null|string the Merchant ID used by the client to send requests
+    * @return string the base URL for UberDirect's API
     */
-   public function getMerchantID()
+   public function getAuthUrl()
    {
-      return $this->config['merchant_id'];
+      return $this->config['auth_url'];
    }
 
    /**
@@ -79,32 +91,17 @@ class BaseUberDirectClient implements UberDirectClientInterface
     */
    public function getAccessToken()
    {
-      // Combine client_id and client_secret with a colon
-      $credentials = $this->getClientID() . ':' . $this->getClientSecret();
-
-      // Base64 encode the combined string
-      $base64Credentials = base64_encode($credentials);
-
       // Instantiate a Guzzle client
       $client = new Client();
 
-      // Define the request parameters
-      $requestParams = [
-         'headers' => [
-            'Authorization' => 'Basic ' . $base64Credentials,
-            'Content-Type' => 'application/x-www-form-urlencoded',
-         ],
+      $response = $client->post($this->getAuthUrl() . "token", [
          'form_params' => [
+            'client_id' => $this->getClientID(),
+            'client_secret' => $this->getClientSecret(),
             'grant_type' => 'client_credentials',
-         ],
-      ];
-
-      $authTokenUrl = "https://auth.prod.uber-direct.io/oauth2/token";
-      if (strpos($this->getApiBase(), 'sandbox') !== false) {
-         $authTokenUrl = "https://auth.sandbox.uber-direct.io/oauth2/token";
-      }
-      // Make the POST request
-      $response = $client->post($authTokenUrl, $requestParams);
+            'scope' => 'eats.deliveries'
+         ]
+      ]);
 
       // Get the response body as a string
       $responseBody = $response->getBody()->getContents();
@@ -117,7 +114,7 @@ class BaseUberDirectClient implements UberDirectClientInterface
 
 
    /**
-    * Sends a request to uber-direct's API.
+    * Sends a request to Uber Direct's API.
     *
     * @param string $method the HTTP method
     * @param string $path the path of the request
@@ -130,12 +127,11 @@ class BaseUberDirectClient implements UberDirectClientInterface
          'headers' => [
             'accept' => 'application/json',
             'content-type' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->getAccessToken(),
-            'X-uber-direct-MERCHANT-ID' => $this->getMerchantID()
+            'Authorization' => 'Bearer ' . $params['access_token']
          ]
       ]);
 
-      $api = $this->getApiBase() . $path;
+      $api = $this->getApiBase() . $params['customer_id'] . $path;
 
       $response = $client->request($method, $api, [
          'http_errors' => true,
@@ -152,6 +148,18 @@ class BaseUberDirectClient implements UberDirectClientInterface
     */
    private function validateConfig($config)
    {
+      if (!is_string($config['customer_id'])) {
+         throw new InvalidArgumentException('customer_id must be a string');
+      }
+
+      if ('' === $config['customer_id']) {
+         throw new InvalidArgumentException('customer_id cannot be an empty string');
+      }
+
+      if (preg_match('/\s/', $config['customer_id'])) {
+         throw new InvalidArgumentException('customer_id cannot contain whitespace');
+      }
+
       // client_id
       if (!isset($config['client_id'])) {
          throw new InvalidArgumentException('client_id field is required');
@@ -189,16 +197,16 @@ class BaseUberDirectClient implements UberDirectClientInterface
          throw new InvalidArgumentException('client_secret field is required');
       }
 
-      if (!is_string($config['merchant_id'])) {
-         throw new InvalidArgumentException('merchant_id must be a string');
+      if (!isset($config['auth_url'])) {
+         throw new InvalidArgumentException('auth_url field is required');
       }
 
-      if ('' === $config['merchant_id']) {
-         throw new InvalidArgumentException('merchant_id cannot be an empty string');
+      if (!is_string($config['auth_url'])) {
+         throw new InvalidArgumentException('auth_url must be a string');
       }
 
-      if (preg_match('/\s/', $config['merchant_id'])) {
-         throw new InvalidArgumentException('merchant_id cannot contain whitespace');
+      if ('' === $config['auth_url']) {
+         throw new InvalidArgumentException('auth_url cannot be an empty string');
       }
 
       if (!isset($config['api_base'])) {
@@ -214,9 +222,10 @@ class BaseUberDirectClient implements UberDirectClientInterface
       }
 
       return [
+         "customer_id" => $config['customer_id'],
          "client_id" => $config['client_id'],
          "client_secret" => $config['client_secret'],
-         "merchant_id" => $config['merchant_id'],
+         "auth_url" => $config['auth_url'],
          "api_base" => $config['api_base'],
       ];
    }

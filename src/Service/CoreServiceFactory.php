@@ -13,7 +13,7 @@ class CoreServiceFactory extends AbstractServiceFactory
      */
     private static $classMap = [
         'quote' => QuoteService::class,
-        'order' => OrderService::class,
+        'delivery' => DeliveryService::class,
     ];
 
     protected function getServiceClass($name)
