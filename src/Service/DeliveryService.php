@@ -16,6 +16,6 @@ class DeliveryService extends AbstractService
     */
    public function create(array $params)
    {
-      return $this->request(HttpMethodEnum::POST, '/order', $params);
+      return $this->request(HttpMethodEnum::POST, '/deliveries', $params);
    }
 }
