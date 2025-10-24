@@ -12,6 +12,9 @@ class BaseUberDirectClient implements UberDirectClientInterface
    /** @var array<string, mixed> */
    private $config;
 
+   /** @var string|null */
+   private $accessToken;
+
    /**
     * Initializes a new instance of the {@link BaseUberDirectClient} class.
     *
@@ -85,12 +88,26 @@ class BaseUberDirectClient implements UberDirectClientInterface
    }
 
    /**
+    * Set Access Token
+    *
+    * @param string $token the access token to set
+    */
+   public function setAccessToken($token)
+   {
+      $this->accessToken = $token;
+   }
+
+   /**
     * Get Access Token
     *
     * @return string the access token
     */
    public function getAccessToken()
    {
+      if ($this->accessToken) {
+         return $this->accessToken;
+      }
+
       // Instantiate a Guzzle client
       $client = new Client();
 
@@ -109,7 +126,8 @@ class BaseUberDirectClient implements UberDirectClientInterface
       // Decode the JSON response
       $result = json_decode($responseBody, true);
 
-      return $result['access_token'];
+      $this->accessToken = $result['access_token'];
+      return $this->accessToken;
    }
 
 
@@ -127,11 +145,14 @@ class BaseUberDirectClient implements UberDirectClientInterface
          'headers' => [
             'accept' => 'application/json',
             'content-type' => 'application/json',
-            'Authorization' => 'Bearer ' . $params['access_token']
+            'Authorization' => 'Bearer ' . $this->getAccessToken()
          ]
       ]);
 
-      $api = $this->getApiBase() . $params['customer_id'] . $path;
+      $customer_id = $this->getCustomerID();
+
+      $api = $this->getApiBase() . $customer_id . $path;
+
 
       $response = $client->request($method, $api, [
          'http_errors' => true,

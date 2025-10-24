@@ -4,7 +4,8 @@ namespace Hyperzod\UberDirectSdkPhp\Service;
 
 /**
  * Service factory class for API resources in the root namespace.
- * @property QuoteService $QuoteService
+ * @property QuoteService $quote
+ * @property DeliveryService $delivery
  */
 class CoreServiceFactory extends AbstractServiceFactory
 {
@@ -13,6 +14,7 @@ class CoreServiceFactory extends AbstractServiceFactory
      */
     private static $classMap = [
         'delivery' => DeliveryService::class,
+        'quote' => QuoteService::class,
     ];
 
     protected function getServiceClass($name)
